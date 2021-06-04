@@ -1,7 +1,16 @@
-#include <iostream>
+#include <benchmark/benchmark.h>
+#include "../src/levenshtein.h"
 
 using namespace std;
 
-int main() {
-    return 0;
+static void BM_lev_dist(benchmark::State &state) {
+    for (auto _ : state) {
+       string s1 = "kitten";
+       string s2 = "sitting";
+       int dist = lev_dist(s1, s2);
+    }
 }
+
+BENCHMARK(BM_lev_dist);
+
+BENCHMARK_MAIN();
