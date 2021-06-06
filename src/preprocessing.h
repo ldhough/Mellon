@@ -8,8 +8,9 @@
 class Password_Preprocessor {
     private:
         std::vector<std::string> password_list;
+        size_t list_size;
         std::vector<std::pair<std::string, int>> password_distances;
-        void calculate_lev();
+        int calculate_min_lev(size_t);
         void sort_by_lev_dist();
     public:
         Password_Preprocessor(std::vector<std::string> password_list);
