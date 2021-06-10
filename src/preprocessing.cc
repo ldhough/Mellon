@@ -49,9 +49,36 @@ vector<pair<string, int>> Password_Preprocessor::process() {
     // long is needed to hold number of computations needed for large password lists which exceed INT_MAX
     long num_distances = ceil(0.5*(n-1)*n);
 
-    int num_cores = thread::hardware_concurrency();
+    const int num_cores = thread::hardware_concurrency() / 2; // **TEMP** until a portable way to discover physical cores is implemented
+    int cores_unassigned = num_cores;
 
-    long distances_per_core = num_distances / num_cores;
+    const long optimal_comps_per_core = num_distances / num_cores;
+
+    // Want threads to process all computations for an individual password to prevent overhead in having threads safely communicate
+    // Will try to keep the number of computations as close as possible to optimal_dists_per_core with this constraint in mind
+    
+    int earliest_unassigned = 0; // Next unassigned password index
+    for (size_t core = 0; core < num_cores; core++) {
+        
+        vector<int> passwords_on_thread;
+        int cumulative_computations = 0;
+        
+        // Check if adding the number of computations for the next password to this core will be
+        // closer or further away from optimal_computations_per_core
+        
+        int computations_password_i = n - earliest_unassigned - 1;
+        int proposed_comps = cumulative_computations + computations_password_i;
+
+        while (optimal_comps_per_core - proposed_comps < optimal_comps_per_core - cumulative_computations) {
+            
+            cumulative_computations = proposed_comps;
+            passwords_on_thread.push_back(earliest_unassigned);
+            earliest_unassigned++;
+            computations_password_i = n - earliest_unassigned - 1;
+            proposed_comps = cumulative_computations + computations_password_i;
+        }
+        cores_unassigned--;
+    }
 
     this->calculate_min_lev(0);
     return this->password_distances;
