@@ -35,6 +35,12 @@ void Password_Preprocessor::sort_by_lev_dist() {
 
 }
 
+// Calculates lev dist for passwords in range [i, n)
+//
+int Password_Preprocessor::lev_subprocess(int start, int end) {
+
+}
+
 vector<pair<string, int>> Password_Preprocessor::process() {
 
     /*
@@ -58,9 +64,12 @@ vector<pair<string, int>> Password_Preprocessor::process() {
     // Will try to keep the number of computations as close as possible to optimal_dists_per_core with this constraint in mind
     
     int earliest_unassigned = 0; // Next unassigned password index
+    stack<pair<int, int>> processing_stack;
     for (size_t core = 0; core < num_cores; core++) {
         
-        vector<int> passwords_on_thread;
+        //vector<int> passwords_on_thread;
+        const int pass_start_index = earliest_unassigned;
+        int pass_end_index = earliest_unassigned; // exclusive range
         int cumulative_computations = 0;
         
         // Check if adding the number of computations for the next password to this core will be
@@ -69,15 +78,36 @@ vector<pair<string, int>> Password_Preprocessor::process() {
         int computations_password_i = n - earliest_unassigned - 1;
         int proposed_comps = cumulative_computations + computations_password_i;
 
-        while (optimal_comps_per_core - proposed_comps < optimal_comps_per_core - cumulative_computations) {
+        while (abs(optimal_comps_per_core - proposed_comps) < abs(optimal_comps_per_core - cumulative_computations)) {
             
             cumulative_computations = proposed_comps;
-            passwords_on_thread.push_back(earliest_unassigned);
+            //passwords_on_thread.push_back(earliest_unassigned); // rework
             earliest_unassigned++;
+            pass_end_index++;
             computations_password_i = n - earliest_unassigned - 1;
             proposed_comps = cumulative_computations + computations_password_i;
         }
+        
         cores_unassigned--;
+        if (!cores_unassigned && earliest_unassigned < n-1) {
+            pass_end_index = n;
+        }
+
+        pair<int, int> range = {pass_start_index, pass_end_index};
+        processing_stack.push(range);
+    }
+
+    size_t stack_size = processing_stack.size();
+    thread tid[stack_size];
+
+    for (size_t i = 0; i < stack_size; i++) {
+        pair p = processing_stack.pop();
+        thread t(lev_subprocess, p.first, p.second);
+        tid[i] = t;
+    }
+
+    for (thread t : tid) {
+        t.join();
     }
 
     this->calculate_min_lev(0);
