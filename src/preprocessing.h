@@ -12,7 +12,7 @@ class Password_Preprocessor {
         std::vector<std::pair<std::string, int>> password_distances;
         int calculate_min_lev(size_t);
         void sort_by_lev_dist();
-        void lev_subprocess(int, int);
+        void lev_subprocess(size_t, size_t);
     public:
         Password_Preprocessor(std::vector<std::string> password_list);
         std::vector<std::pair<std::string, int>> process();

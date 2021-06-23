@@ -1,7 +1,8 @@
 CC = gcc
 CXX = g++
-CPPFLAGS = -Wall -O3 -std=c++11
+CPPFLAGS = -Wall -O3 -std=c++11 -pthread
 RM = rm -f
+BIN = ../bin/
 
 SRCS = main.cc preprocessing.cc levenshtein.cc
 OBJS = $(subst .cc,.o,$(SRCS))
@@ -9,7 +10,7 @@ OBJS = $(subst .cc,.o,$(SRCS))
 all: mellon_processing
 
 mellon_processing: $(OBJS)
-	$(CXX) $(CPPFLAGS) -o mellon_processing $(OBJS)
+	$(CXX) $(CPPFLAGS) -o $(BIN)mellon_processing $(OBJS)
 
 main.o: main.cc preprocessing.h
 	$(CXX) $(CPPFLAGS) -c main.cc

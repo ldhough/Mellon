@@ -1,2 +1,5 @@
 # Ignore object files
 *.o
+
+# Ignore everything under testing/build
+testing/build
