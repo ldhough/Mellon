@@ -31,8 +31,8 @@ mutex cout_mutex;
 inline int Password_Preprocessor::calculate_min_lev(size_t for_index) {
    
     int min_lev = INT_MAX;
-
-    for (size_t i = for_index; i < this->list_size; i++) {
+    size_t i = for_index;
+    //for (size_t i = for_index; i < this->list_size; i++) {
         for (size_t j = i+1; j < this->list_size; j++) {
             #if DEBUG
             cout_mutex.lock();
@@ -43,9 +43,12 @@ inline int Password_Preprocessor::calculate_min_lev(size_t for_index) {
             int lev_distance = lev_dist(this->password_list.at(i), this->password_list.at(j));
             if (lev_distance < min_lev)
                 min_lev = lev_distance;
-            //cout << "distance between " << this->password_list.at(i) << " and " << this->password_list.at(j) << " is " << lev_distance << endl;
         }
-    }
+    //}
+
+    #if DEBUG
+    cout << "Returning min_lev " << min_lev << " for password " << this->password_list.at(for_index) << endl;
+    #endif
 
     return min_lev;
 }
