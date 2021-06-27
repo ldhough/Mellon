@@ -9,6 +9,12 @@
 #include <cmath>
 #include <climits>
 
+#define DEBUG 1
+
+#if DEBUG
+#include <mutex>
+#endif
+
 using namespace std;
 
 // Password_Preprocessor constructor
@@ -18,16 +24,26 @@ Password_Preprocessor::Password_Preprocessor(vector<string> password_list) {
     this->password_distances.resize(this->list_size); 
 }
 
+#if DEBUG
+mutex cout_mutex;
+#endif
+
 inline int Password_Preprocessor::calculate_min_lev(size_t for_index) {
    
     int min_lev = INT_MAX;
 
     for (size_t i = for_index; i < this->list_size; i++) {
         for (size_t j = i+1; j < this->list_size; j++) {
+            #if DEBUG
+            cout_mutex.lock();
+            cout << "Comparing password " << this->password_list.at(i) << " to " << this->password_list.at(j) << endl;
+            cout << "Distance between compared passwords is " << lev_dist(this->password_list.at(i), this->password_list.at(j)) << endl;
+            cout_mutex.unlock();
+            #endif
             int lev_distance = lev_dist(this->password_list.at(i), this->password_list.at(j));
             if (lev_distance < min_lev)
                 min_lev = lev_distance;
-            cout << "distance between " << this->password_list.at(i) << " and " << this->password_list.at(j) << " is " << lev_distance << endl;
+            //cout << "distance between " << this->password_list.at(i) << " and " << this->password_list.at(j) << " is " << lev_distance << endl;
         }
     }
 
@@ -58,8 +74,13 @@ vector<pair<string, int>> Password_Preprocessor::process() {
 
     const unsigned int num_cores = thread::hardware_concurrency() / 2; // **TEMP** until a portable way to discover physical cores is implemented
     int cores_unassigned = num_cores;
-
     const long optimal_comps_per_core = num_distances / num_cores;
+
+    #if DEBUG
+    cout << "Maximum threads to create is: " << num_cores << endl;
+    cout << "num_distances is: " << num_distances << endl;
+    cout << "optimal_comps_per_core = " << optimal_comps_per_core << endl;
+    #endif
 
     // Want threads to process all computations for an individual password to prevent overhead in having threads safely communicate
     // Will try to keep the number of computations as close as possible to optimal_dists_per_core with this constraint in mind
@@ -108,6 +129,15 @@ vector<pair<string, int>> Password_Preprocessor::process() {
     }
 
     size_t stack_size = processing_stack.size();
+
+    #if DEBUG
+    auto ps = processing_stack;
+    for (size_t i = 0; i < stack_size; i++) {
+        auto pair = ps.top();
+        ps.pop();
+        cout << "Range in processing_stack is " << pair.first << " - " << pair.second << endl;
+    }
+    #endif
 
     if (stack_size > 1) {
 

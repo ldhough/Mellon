@@ -3,6 +3,7 @@
 #include "../src/levenshtein.h"
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 using namespace std;
 
@@ -20,10 +21,14 @@ TEST(PasswordPreprocessorTest, TestSizeTen) {
     auto passwords = passwords_to_string_vec(filename + ".txt");
     Password_Preprocessor p(passwords);
     auto v2 = p.process();
+    cout << "========== TEST SIZE 10 PASSWORD PREPROCESSOR ==========" << endl;
     for (size_t i = 0; i < v1.size(); i++) {
+        cout << "passwords are " << v1[i].first << " and " << v2[i].first << endl;
+        cout << "distances are " << v1[i].second << " and " << v2[i].second << endl;
         ASSERT_TRUE(v1[i].first == v2[i].first);
         ASSERT_TRUE(v1[i].second == v2[i].second);
     }
+    cout << "========== TEST SIZE 10 PASSWORD PREPROCESSOR END ==========" << endl;
 }
 
 vector<string> passwords_to_string_vec(string name) {
