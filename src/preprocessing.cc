@@ -75,7 +75,7 @@ vector<pair<string, int>> Password_Preprocessor::process() {
     // long is needed to hold number of computations needed for large password lists which exceed INT_MAX
     long num_distances = ceil(0.5*(n-1)*n);
 
-    const unsigned int num_cores = thread::hardware_concurrency() / 2; // **TEMP** until a portable way to discover physical cores is implemented
+    const unsigned int num_cores = thread::hardware_concurrency(); // **TEMP** until a portable way to discover physical cores is implemented
     int cores_unassigned = num_cores;
     const long optimal_comps_per_core = num_distances / num_cores;
 
@@ -164,9 +164,23 @@ vector<pair<string, int>> Password_Preprocessor::process() {
 
     cout << "Computing minimum Levenshtein distances completed." << endl;
 
+    this->sort_by_lev_dist();
+
+    #if DEBUG
+
+    for (auto p : this->password_distances)
+        cout << "Distance for password " << p.first << " is " << p.second << endl;
+    
+    #endif
+
     return this->password_distances;
 }
 
-void Password_Preprocessor::sort_by_lev_dist() {
+inline void Password_Preprocessor::sort_by_lev_dist() {
+
+    sort(begin(this->password_distances), end(this->password_distances),
+        [](pair<string, int> a, pair<string, int> b) {
+            return a.second < b.second;
+        });
 
 }
