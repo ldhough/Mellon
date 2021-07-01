@@ -21,6 +21,11 @@ using namespace std;
 Password_Preprocessor::Password_Preprocessor(vector<string> password_list) {
     this->password_list = password_list;
     this->list_size = this->password_list.size();
+
+    #if DEBUG
+    cout << "Resizing password_distances to " << this->list_size << endl;
+    #endif
+
     this->password_distances.resize(this->list_size); 
 }
 
@@ -36,8 +41,8 @@ inline int Password_Preprocessor::calculate_min_lev(size_t for_index) {
         for (size_t j = i+1; j < this->list_size; j++) {
             #if DEBUG
             cout_mutex.lock();
-            cout << "Comparing password " << this->password_list.at(i) << " to " << this->password_list.at(j) << endl;
-            cout << "Distance between compared passwords is " << lev_dist(this->password_list.at(i), this->password_list.at(j)) << endl;
+            //cout << "Comparing password " << this->password_list.at(i) << " to " << this->password_list.at(j) << endl;
+            //cout << "Distance between compared passwords is " << lev_dist(this->password_list.at(i), this->password_list.at(j)) << endl;
             cout_mutex.unlock();
             #endif
             int lev_distance = lev_dist(this->password_list.at(i), this->password_list.at(j));
@@ -47,7 +52,9 @@ inline int Password_Preprocessor::calculate_min_lev(size_t for_index) {
     //}
 
     #if DEBUG
+    cout_mutex.lock();
     cout << "Returning min_lev " << min_lev << " for password " << this->password_list.at(for_index) << endl;
+    cout_mutex.unlock();
     #endif
 
     return min_lev;
@@ -57,6 +64,10 @@ inline int Password_Preprocessor::calculate_min_lev(size_t for_index) {
 inline void Password_Preprocessor::lev_subprocess(size_t start, size_t end) {
     for (size_t i = start; i < end; i++) {
         auto pw = password_list.at(i);
+        #if DEBUG
+        if (pw == "")
+            cout << "password is empty string" << endl;
+        #endif
         password_distances[i] = pair<string, int>(pw, this->calculate_min_lev(i));
     }
 }
@@ -132,6 +143,7 @@ vector<pair<string, int>> Password_Preprocessor::process() {
     }
 
     size_t stack_size = processing_stack.size();
+    processing_stack.top().second = n; // End should always be n
 
     #if DEBUG
     auto ps = processing_stack;
@@ -140,6 +152,11 @@ vector<pair<string, int>> Password_Preprocessor::process() {
         ps.pop();
         cout << "Range in processing_stack is " << pair.first << " - " << pair.second << endl;
     }
+
+    cout << "PRE COMPUTATIONS: " << endl;
+    for (auto p : this->password_distances)
+        cout << "Distance for password " << p.first << " is " << p.second << endl;
+
     #endif
 
     if (stack_size > 1) {
@@ -159,10 +176,17 @@ vector<pair<string, int>> Password_Preprocessor::process() {
         }
     } else {
         cout << "Computing minimum Levenshtein distances." << endl;    
-        this->lev_subprocess(0, n-1);
+        this->lev_subprocess(0, n);
     }
 
     cout << "Computing minimum Levenshtein distances completed." << endl;
+
+    #if DEBUG
+    cout << "PRE SORT: " << endl;
+    for (auto p : this->password_distances)
+        cout << "Distance for password " << p.first << " is " << p.second << endl;
+    cout << "POST SORT: " << endl; 
+    #endif
 
     this->sort_by_lev_dist();
 
