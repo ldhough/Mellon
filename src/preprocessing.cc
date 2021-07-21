@@ -8,6 +8,7 @@
 #include <thread>
 #include <cmath>
 #include <climits>
+#include <algorithm>
 
 #define DEBUG 1
 
