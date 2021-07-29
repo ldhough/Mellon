@@ -11,13 +11,14 @@ class Password_Node {
         // If empty str, can assume is root/goal
         std::string transformation = "";
 
+        // TODO: IMPLEMENT
         // "hashcat distance" of this password from root, 0 is root
         size_t distance = 0;
 
         // Upper limit on upper number of hashcat rules to attempt
         size_t rule_limit;
-        std::vector<Password_Node> parents;
-        std::vector<Password_Node> children;
+        std::vector<Password_Node*> parents;
+        std::vector<Password_Node*> children;
 
         Password_Node(std::string, size_t);
 };
