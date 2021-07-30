@@ -1,5 +1,6 @@
 #include "preprocessing.h"
 #include "levenshtein.h"
+#include "utils.h"
 #include <string>
 #include <vector>
 #include <stack>
@@ -10,7 +11,7 @@
 #include <climits>
 #include <algorithm>
 
-#define DEBUG 1
+#define DEBUG 0
 
 #if DEBUG
 #include <mutex>
@@ -164,7 +165,7 @@ vector<pair<string, int>> Password_Preprocessor::process() {
 
         thread tid[stack_size];
 
-        cout << "Creating " << stack_size << " threads to compute minimum Levenshtein distances." << endl;
+        cout << BLUE << "INFO: " << RESET << "Creating " << stack_size << " threads to compute minimum Levenshtein distances." << endl;
 
         for (size_t i = 0; i < stack_size; i++) {
             auto range = processing_stack.top();
@@ -176,11 +177,11 @@ vector<pair<string, int>> Password_Preprocessor::process() {
             t.join();
         }
     } else {
-        cout << "Computing minimum Levenshtein distances." << endl;    
+        cout << BLUE << "INFO: " << RESET << "Computing minimum Levenshtein distances." << endl;    
         this->lev_subprocess(0, n);
     }
 
-    cout << "Computing minimum Levenshtein distances completed." << endl;
+    cout << BLUE << "INFO: " << RESET << "Computing minimum Levenshtein distances completed." << endl;
 
     #if DEBUG
     cout << "PRE SORT: " << endl;

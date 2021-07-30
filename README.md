@@ -2,3 +2,4 @@ The purpose of this project is to investigate how people create passwords and ho
 
 References:
 https://notsosecure.com/one-rule-to-rule-them-all/
+https://hashcat.net/wiki/doku.php?id=rule_based_attack
