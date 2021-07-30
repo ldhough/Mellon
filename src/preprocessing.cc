@@ -181,7 +181,7 @@ vector<pair<string, int>> Password_Preprocessor::process() {
         this->lev_subprocess(0, n);
     }
 
-    cout << BLUE << "INFO: " << RESET << "Computing minimum Levenshtein distances completed." << endl;
+    cout << GREEN << "SUCCESS: " << RESET << "Computing minimum Levenshtein distances completed." << endl;
 
     #if DEBUG
     cout << "PRE SORT: " << endl;
