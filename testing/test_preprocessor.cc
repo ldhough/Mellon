@@ -6,6 +6,8 @@
 #include <iostream>
 #include <map>
 
+#define DEBUG 0
+
 using namespace std;
 
 map<string, int> answers_to_map(string);
@@ -16,22 +18,33 @@ int main(int argc, char **argv) {
     return RUN_ALL_TESTS();
 }
 
+void debug_print_pass_dist(string p, int d) {
+    #if DEBUG
+    cout << "Pass is: " << p << endl << "Dist is: " << d << endl;
+    #endif
+}
+
+void debug_print(string s) {
+    #if DEBUG
+    cout << s << endl;
+    #endif
+}
+
 TEST(PasswordPreprocessorTest, TestSizeFive) {
     string filename = "random_password_lists_testing/test_list_5";
     auto m = answers_to_map(filename + "_min_levs.csv");
     auto passwords = passwords_to_string_vec(filename + ".txt");
     Password_Preprocessor p(passwords);
     auto v2 = p.process();
-    cout << "========== TEST SIZE 5 PASSWORD PREPROCESSOR ==========" << endl;
+    debug_print("========== TEST SIZE 5 PASSWORD PREPROCESSOR ==========");
     for (size_t i = 0; i < passwords.size()-1; i++) { //-1 because last password with INT_MAX dist isn't included
         auto pass = v2[i].first;
-        cout << "Pass is: " << pass << endl;
         auto dist = v2[i].second;
-        cout << "Dist is: " << dist << endl;
+        debug_print_pass_dist(pass, dist);
         ASSERT_TRUE(m.contains(pass));
         ASSERT_TRUE(m[pass] == dist);
     }
-    cout << "========== TEST SIZE 5 PASSWORD PREPROCESSOR END ==========" << endl;
+    debug_print("========== TEST SIZE 5 PASSWORD PREPROCESSOR END ==========");
 }
 
 TEST(PasswordPreprocessorTest, TestSizeThree) {
@@ -40,16 +53,15 @@ TEST(PasswordPreprocessorTest, TestSizeThree) {
     auto passwords = passwords_to_string_vec(filename + ".txt");
     Password_Preprocessor p(passwords);
     auto v2 = p.process();
-    cout << "========== TEST SIZE 3 PASSWORD PREPROCESSOR ==========" << endl;
+    debug_print("========== TEST SIZE 3 PASSWORD PREPROCESSOR ==========");
     for (size_t i = 0; i < passwords.size()-1; i++) { //-1 because last password with INT_MAX dist isn't included
         auto pass = v2[i].first;
-        cout << "Pass is: " << pass << endl;
         auto dist = v2[i].second;
-        cout << "Dist is: " << dist << endl;
+        debug_print_pass_dist(pass, dist);
         ASSERT_TRUE(m.contains(pass));
         ASSERT_TRUE(m[pass] == dist);
     }
-    cout << "========== TEST SIZE 3 PASSWORD PREPROCESSOR END ==========" << endl;
+    debug_print("========== TEST SIZE 3 PASSWORD PREPROCESSOR END ==========");
 }
 
 TEST(PasswordPreprocessorTest, TestSizeTwentyFive) {
@@ -58,16 +70,15 @@ TEST(PasswordPreprocessorTest, TestSizeTwentyFive) {
     auto passwords = passwords_to_string_vec(filename + ".txt");
     Password_Preprocessor p(passwords);
     auto v2 = p.process();
-    cout << "========== TEST SIZE 25 PASSWORD PREPROCESSOR ==========" << endl;
+    debug_print("========== TEST SIZE 25 PASSWORD PREPROCESSOR ==========");
     for (size_t i = 0; i < passwords.size()-1; i++) { //-1 because last password with INT_MAX dist isn't included
         auto pass = v2[i].first;
-        cout << "Pass is: " << pass << endl;
         auto dist = v2[i].second;
-        cout << "Dist is: " << dist << endl;
+        debug_print_pass_dist(pass, dist);
         ASSERT_TRUE(m.contains(pass));
         ASSERT_TRUE(m[pass] == dist);
     }
-    cout << "========== TEST SIZE 25 PASSWORD PREPROCESSOR END ==========" << endl;
+    debug_print("========== TEST SIZE 25 PASSWORD PREPROCESSOR END ==========");
 }
 
 TEST(PasswordPreprocessorTest, TestSizeTwenty) {
@@ -76,16 +87,15 @@ TEST(PasswordPreprocessorTest, TestSizeTwenty) {
     auto passwords = passwords_to_string_vec(filename + ".txt");
     Password_Preprocessor p(passwords);
     auto v2 = p.process();
-    cout << "========== TEST SIZE 20 PASSWORD PREPROCESSOR ==========" << endl;
+    debug_print("========== TEST SIZE 20 PASSWORD PREPROCESSOR ==========");
     for (size_t i = 0; i < passwords.size()-1; i++) { //-1 because last password with INT_MAX dist isn't included
         auto pass = v2[i].first;
-        cout << "Pass is: " << pass << endl;
         auto dist = v2[i].second;
-        cout << "Dist is: " << dist << endl;
+        debug_print_pass_dist(pass, dist);
         ASSERT_TRUE(m.contains(pass));
         ASSERT_TRUE(m[pass] == dist);
     }
-    cout << "========== TEST SIZE 20 PASSWORD PREPROCESSOR END ==========" << endl;
+    debug_print("========== TEST SIZE 20 PASSWORD PREPROCESSOR END ==========");
 }
 
 TEST(PasswordPreprocessorTest, TestSizeOne) {
@@ -94,16 +104,15 @@ TEST(PasswordPreprocessorTest, TestSizeOne) {
     auto passwords = passwords_to_string_vec(filename + ".txt");
     Password_Preprocessor p(passwords);
     auto v2 = p.process();
-    cout << "========== TEST SIZE 1 PASSWORD PREPROCESSOR ==========" << endl;
+    debug_print("========== TEST SIZE 1 PASSWORD PREPROCESSOR ==========");
     for (size_t i = 0; i < passwords.size()-1; i++) { //-1 because last password with INT_MAX dist isn't included
         auto pass = v2[i].first;
-        cout << "Pass is: " << pass << endl;
         auto dist = v2[i].second;
-        cout << "Dist is: " << dist << endl;
+        debug_print_pass_dist(pass, dist);
         ASSERT_TRUE(m.contains(pass));
         ASSERT_TRUE(m[pass] == dist);
     }
-    cout << "========== TEST SIZE 1 PASSWORD PREPROCESSOR END ==========" << endl;
+    debug_print("========== TEST SIZE 1 PASSWORD PREPROCESSOR END ==========");
 }
 
 TEST(PasswordPreprocessorTest, TestSizeThirteen) {
@@ -112,16 +121,15 @@ TEST(PasswordPreprocessorTest, TestSizeThirteen) {
     auto passwords = passwords_to_string_vec(filename + ".txt");
     Password_Preprocessor p(passwords);
     auto v2 = p.process();
-    cout << "========== TEST SIZE 13 PASSWORD PREPROCESSOR ==========" << endl;
+    debug_print("========== TEST SIZE 13 PASSWORD PREPROCESSOR ==========");
     for (size_t i = 0; i < passwords.size()-1; i++) { //-1 because last password with INT_MAX dist isn't included
         auto pass = v2[i].first;
-        cout << "Pass is: " << pass << endl;
         auto dist = v2[i].second;
-        cout << "Dist is: " << dist << endl;
+        debug_print_pass_dist(pass, dist);
         ASSERT_TRUE(m.contains(pass));
         ASSERT_TRUE(m[pass] == dist);
     }
-    cout << "========== TEST SIZE 13 PASSWORD PREPROCESSOR END ==========" << endl;
+    debug_print("========== TEST SIZE 13 PASSWORD PREPROCESSOR END ==========");
 }
 
 
@@ -131,16 +139,15 @@ TEST(PasswordPreprocessorTest, TestSizeHundred) {
     auto passwords = passwords_to_string_vec(filename + ".txt");
     Password_Preprocessor p(passwords);
     auto v2 = p.process();
-    cout << "========== TEST SIZE 100 PASSWORD PREPROCESSOR ==========" << endl;
+    debug_print("========== TEST SIZE 100 PASSWORD PREPROCESSOR ==========");
     for (size_t i = 0; i < passwords.size()-1; i++) { //-1 because last password with INT_MAX dist isn't included
         auto pass = v2[i].first;
-        cout << "Pass is: " << pass << endl;
         auto dist = v2[i].second;
-        cout << "Dist is: " << dist << endl;
+        debug_print_pass_dist(pass, dist);
         ASSERT_TRUE(m.contains(pass));
         ASSERT_TRUE(m[pass] == dist);
     }
-    cout << "========== TEST SIZE 100 PASSWORD PREPROCESSOR END ==========" << endl;
+    debug_print("========== TEST SIZE 100 PASSWORD PREPROCESSOR END ==========");
 }
 
 
@@ -151,16 +158,15 @@ TEST(PasswordPreprocessorTest, TestSizeTen) {
     auto passwords = passwords_to_string_vec(filename + ".txt");
     Password_Preprocessor p(passwords);
     auto v2 = p.process();
-    cout << "========== TEST SIZE 10 PASSWORD PREPROCESSOR ==========" << endl;
+    debug_print("========== TEST SIZE 10 PASSWORD PREPROCESSOR ==========");
     for (size_t i = 0; i < passwords.size()-1; i++) { //-1 because last password with INT_MAX dist isn't included
         auto pass = v2[i].first;
-        cout << "Pass is: " << pass << endl;
         auto dist = v2[i].second;
-        cout << "Dist is: " << dist << endl;
+        debug_print_pass_dist(pass, dist);
         ASSERT_TRUE(m.contains(pass));
         ASSERT_TRUE(m[pass] == dist);
     }
-    cout << "========== TEST SIZE 10 PASSWORD PREPROCESSOR END ==========" << endl;
+    debug_print("========== TEST SIZE 10 PASSWORD PREPROCESSOR END ==========");
 }
 
 vector<string> passwords_to_string_vec(string name) {
@@ -172,10 +178,8 @@ vector<string> passwords_to_string_vec(string name) {
     return v;
 }
 
-//vector<pair<string, int>> answers_to_pair_vec(string name) {
 map<string, int> answers_to_map(string name) {
 
-    // vector<pair<string, int>> v;
     map<string, int> m;
     ifstream fin(name);
     string line;
@@ -191,7 +195,6 @@ map<string, int> answers_to_map(string name) {
             else
                 p.second = atoi(segment.c_str());
         }
-        //v.push_back(p);
         m.insert_or_assign(p.first, p.second);
     }
 

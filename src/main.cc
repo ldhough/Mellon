@@ -12,11 +12,11 @@ using namespace std;
 
 int main(int argc, char **argv) {
 
-    cout << endl << GREEN << "PROGRAM STARTING..." << RESET << endl << endl;
+    cout << endl << GREEN "PROGRAM STARTING..." RESET << endl << endl;
 
     // Validate program arguments 
     if (argc != 3) {
-        cerr << RED_ERR ", invalid arguments, usage is: " << GREEN << "mellon_processing " << RESET << BLUE << "</path/to/passwords> </path/to/rules>" << RESET << endl;
+        cerr << RED_ERR ", invalid arguments, usage is: " << GREEN "mellon_processing " RESET BLUE "</path/to/passwords> </path/to/rules>" RESET << endl << endl;
         return -1;
     }
 
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     cout << BLUE_INFO ": Attempting to open password file: "  << argv[1] << endl;
     vector<string> passwords_vector = read_lines_to_vec(argv[1]);
     if (passwords_vector.empty()) {
-        cerr << RED << "ERROR: " << RESET << "No passwords to parse, check file." << endl;
+        cerr << RED_ERR ": No passwords to parse, check file." << endl;
         return -1;
     }
 
@@ -50,18 +50,23 @@ int main(int argc, char **argv) {
         }
     }
 
-    
+    /*
     for (string password : passwords_vector) {
         Rule r = rule_v[1];
         password = r.apply_rule(password);
         cout << "Modified password: " << password << endl;
     }
+    */
     
 
     Password_Preprocessor processor(passwords_vector);
     auto processed_passwords = processor.process();
     //Password_Tree password_tree(processed_passwords, rules_vector);
     //password_tree.build_tree();
+
+    for (auto p : processed_passwords) {
+        cout << p.first << " : " << p.second << endl;
+    }
 
     cout << endl;
     return 0;

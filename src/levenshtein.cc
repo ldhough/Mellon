@@ -1,24 +1,23 @@
 #include <string>
 #include <algorithm>
-#include <iostream>
 #include "levenshtein.h"
 
 using namespace std;
 
 // Compute the Levenshtein Distance between two strings
-int lev_dist(string &s1, string &s2) {
+unsigned int lev_dist(string &s1, string &s2) {
 
     // First row/col is substrings compared against the null character
     size_t col_count = s1.size()+1, row_count = s2.size()+1;
-    int r1[col_count];
-    int r2[col_count];
+    unsigned int r1[col_count];
+    unsigned int r2[col_count];
 
     // Initialize first row to sequence, and what will be first comparison row to all zeroes
     for (size_t i = 0; i < col_count; i++)
         r1[i] = i;
     
-    int *mutating_row;
-    int *comparison_row;
+    unsigned int *mutating_row;
+    unsigned int *comparison_row;
     for (size_t row = 1; row < row_count; row++) {
         /*
          * Swap which row is being operated on and storing the computed distances, use the

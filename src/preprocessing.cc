@@ -10,48 +10,111 @@
 #include <cmath>
 #include <climits>
 #include <algorithm>
+#include <mutex>
 
 #define DEBUG 0
 
-#if DEBUG
-#include <mutex>
-#endif
-
 using namespace std;
-
-// Password_Preprocessor constructor
-Password_Preprocessor::Password_Preprocessor(vector<string> password_list) {
-    this->password_list = password_list;
-    this->list_size = this->password_list.size();
-
-    #if DEBUG
-    cout << "Resizing password_distances to " << this->list_size << endl;
-    #endif
-
-    this->password_distances.resize(this->list_size); 
-}
 
 #if DEBUG
 mutex cout_mutex;
 #endif
 
-inline int Password_Preprocessor::calculate_min_lev(size_t for_index) {
+// Password_Preprocessor constructor
+Password_Preprocessor::Password_Preprocessor(vector<string> password_list) {
+
+    this->password_list = password_list;
+    this->list_size = this->password_list.size();
+    this->password_distances.resize(this->list_size); 
+
+}
+
+inline void Password_Preprocessor::sort_by_lev_dist() {
+
+    sort(begin(this->password_distances), end(this->password_distances),
+        [](pair<string, int> a, pair<string, int> b) {
+            return a.second < b.second;
+        });
+
+}
+
+/*
+ *
+ * Compare each password to every other password to calculate the minimum levenshtein distance from any password
+ * to any other password in the list of passwords.  Because levenshtein / edit distance is symmetric, if we store
+ * already computed minimum distances as we advance down the list, when we reach a given password i we only have
+ * to compute the distance to passwords i+1 -> n because distances to all passwords before i have already been
+ * computed
+ *
+ */
+
+inline void Password_Preprocessor::calculate_minimum_lev_distances() {
+    
+    size_t n = this->list_size;
+
+    // Initialize password_distances to contain password strings and distances from the first password
+    string first = this->password_list.at(0);
+    unsigned int first_min = UINT_MAX;
+    for (size_t i = 1; i < n; i++) {
+
+        string compare_password = this->password_list.at(i);
+        unsigned int distance = lev_dist(first, compare_password);
+
+        this->password_distances[i] = {compare_password, distance};
+        if (distance < first_min)
+            first_min = distance;
+
+    }
+    this->password_distances[0] = {first, first_min};
+
+    // Calculate min lev distances for all other passwords
+    for (size_t i = 1; i < n; i++) {
+
+        string password = this->password_list.at(i);
+        unsigned int min_lev_from_uncalculated = UINT_MAX;
+
+        for (size_t j = i+1; j < n; j++) {
+
+            string compare_password = this->password_list.at(j);
+            unsigned int distance = lev_dist(password, compare_password);
+            if (distance < min_lev_from_uncalculated)
+                min_lev_from_uncalculated = distance;
+
+            if (distance < this->password_distances[i].second)
+                this->password_distances[i].second = distance;
+
+        }
+
+        if (min_lev_from_uncalculated < this->password_distances[i].second)
+            this->password_distances[i].second = min_lev_from_uncalculated;
+    }
+
+}
+
+vector<pair<string, unsigned int>> Password_Preprocessor::process() {
+
+   this->calculate_minimum_lev_distances();
+   this->sort_by_lev_dist();
+   return this->password_distances;
+
+}
+
+/*
+inline int Password_Preprocessor::calculate_min_remaining_lev(size_t for_index) {
    
     int min_lev = INT_MAX;
     size_t i = for_index;
-    //for (size_t i = for_index; i < this->list_size; i++) {
-        for (size_t j = i+1; j < this->list_size; j++) {
-            #if DEBUG
-            cout_mutex.lock();
-            //cout << "Comparing password " << this->password_list.at(i) << " to " << this->password_list.at(j) << endl;
-            //cout << "Distance between compared passwords is " << lev_dist(this->password_list.at(i), this->password_list.at(j)) << endl;
-            cout_mutex.unlock();
-            #endif
-            int lev_distance = lev_dist(this->password_list.at(i), this->password_list.at(j));
-            if (lev_distance < min_lev)
-                min_lev = lev_distance;
-        }
-    //}
+    for (size_t j = i+1; j < this->list_size; j++) {
+        #if DEBUG
+        cout_mutex.lock();
+        cout << "Comparing password " << this->password_list.at(i) << " to " << this->password_list.at(j) << endl;
+        cout << "Distance between compared passwords is " << lev_dist(this->password_list.at(i), this->password_list.at(j)) << endl;
+        cout_mutex.unlock();
+        #endif
+        int lev_distance = lev_dist(this->password_list.at(i), this->password_list.at(j));
+        if (lev_distance < min_lev)
+            min_lev = lev_distance;
+    }
 
     #if DEBUG
     cout_mutex.lock();
@@ -70,19 +133,20 @@ inline void Password_Preprocessor::lev_subprocess(size_t start, size_t end) {
         if (pw == "")
             cout << "password is empty string" << endl;
         #endif
-        password_distances[i] = pair<string, int>(pw, this->calculate_min_lev(i));
+        password_distances[i] = pair<string, int>(pw, this->calculate_min_remaining_lev(i));
     }
 }
 
+
 vector<pair<string, int>> Password_Preprocessor::process() {
 
-    /*
-     * We want to compute the minimum levenshtein distance from one password to another in the set for each password.  
-     * Because the distance is symmetric each password i only needs to be compared to passwords i+1 -> n.  To parallelize
-     * this well, we want to know the total number of distances to calculate.  The number of distances computed can be
-     * expressed as ~~ sum of i from i=0 to n-1 ~~ where n is the size of the list.  One password is compared to no
-     * passwords, one is compared to one passwords ... one is compared to n-1 passwords. Closed form is (1/2)(n-1)n
-     */ 
+    
+     // We want to compute the minimum levenshtein distance from one password to another in the set for each password.  
+     // Because the distance is symmetric each password i only needs to be compared to passwords i+1 -> n.  To parallelize
+     // this well, we want to know the total number of distances to calculate.  The number of distances computed can be
+     // expressed as ~~ sum of i from i=0 to n-1 ~~ where n is the size of the list.  One password is compared to no
+     // passwords, one is compared to one passwords ... one is compared to n-1 passwords. Closed form is (1/2)(n-1)n
+     
 
     size_t n = this->list_size;
     // long is needed to hold number of computations needed for large password lists which exceed INT_MAX
@@ -161,11 +225,11 @@ vector<pair<string, int>> Password_Preprocessor::process() {
 
     #endif
 
-    if (stack_size > 1) {
+    if (stack_size > 1 && execute_parallel) {
 
         thread tid[stack_size];
 
-        cout << BLUE << "INFO: " << RESET << "Creating " << stack_size << " threads to compute minimum Levenshtein distances." << endl;
+        cout << BLUE_INFO ": Creating " << stack_size << " threads to compute minimum Levenshtein distances." << endl;
 
         for (size_t i = 0; i < stack_size; i++) {
             auto range = processing_stack.top();
@@ -177,11 +241,11 @@ vector<pair<string, int>> Password_Preprocessor::process() {
             t.join();
         }
     } else {
-        cout << BLUE << "INFO: " << RESET << "Computing minimum Levenshtein distances." << endl;    
+        cout << BLUE_INFO ": Computing minimum Levenshtein distances." << endl;    
         this->lev_subprocess(0, n);
     }
 
-    cout << GREEN << "SUCCESS: " << RESET << "Computing minimum Levenshtein distances completed." << endl;
+    cout << GREEN_SUCCESS ": Computing minimum Levenshtein distances completed." << endl;
 
     #if DEBUG
     cout << "PRE SORT: " << endl;
@@ -193,20 +257,10 @@ vector<pair<string, int>> Password_Preprocessor::process() {
     this->sort_by_lev_dist();
 
     #if DEBUG
-
     for (auto p : this->password_distances)
         cout << "Distance for password " << p.first << " is " << p.second << endl;
-    
     #endif
 
     return this->password_distances;
 }
-
-inline void Password_Preprocessor::sort_by_lev_dist() {
-
-    sort(begin(this->password_distances), end(this->password_distances),
-        [](pair<string, int> a, pair<string, int> b) {
-            return a.second < b.second;
-        });
-
-}
+*/
